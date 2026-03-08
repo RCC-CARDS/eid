@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="mainHtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greeting Card Studio | RCC</title>
+    <style>
+        @font-face { font-family: 'MyCustomFont'; src: url('font.otf') format('opentype'); }
+        :root { --primary: #2563eb; --primary-hover: #1d4ed8; --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #1f2937; --text-muted: #6b7280; --border-color: #e5e7eb; --success: #10b981; --success-hover: #059669; }
+        body { font-family: 'MyCustomFont', system-ui, sans-serif; background: var(--bg-color); padding: 20px 10px; margin: 0; color: var(--text-main); display: flex; justify-content: center; }
+        .app-container { background: var(--card-bg); width: 100%; max-width: 520px; border-radius: 24px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { text-align: center; padding: 25px 20px 15px; border-bottom: 1px solid var(--border-color); }
+        .logo-img { max-width: 100px; opacity: 0.95; }
+        .section-p { padding: 20px; border-bottom: 1px solid var(--border-color); }
+        .section-title { font-size: 15px; font-weight: bold; color: var(--text-main); margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px; }
+        .section-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background: var(--primary); border-radius: 4px; }
+        .segmented-control { display: flex; background: var(--bg-color); padding: 4px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .seg-btn { flex: 1; padding: 10px 5px; border: none; background: transparent; color: var(--text-muted); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.2s ease; }
+        .seg-btn.active { background: var(--card-bg); color: var(--primary); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        .preview-container { padding: 20px; background: #f9fafb; text-align: center; border-bottom: 1px solid var(--border-color); }
+        .preview-box { border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); background: #e5e7eb; display: inline-block; width: 100%; line-height: 0; }
+        canvas { max-width: 100%; height: auto; display: block; width: 100%; }
+        .input-field { width: 100%; padding: 14px 16px; border: 2px solid var(--border-color); border-radius: 12px; font-size: 16px; font-family: inherit; box-sizing: border-box; transition: 0.3s; background: var(--bg-color); outline: none; margin-bottom: 12px; text-align: center; }
+        .input-field:focus { border-color: var(--primary); background: var(--card-bg); }
+        .style-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 15px; background: var(--bg-color); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .control-row { display: flex; align-items: center; gap: 15px; }
+        .label-sm { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; min-width: 90px; }
+        input[type="range"] { -webkit-appearance: none; flex: 1; height: 6px; background: #d1d5db; border-radius: 5px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--primary); cursor: pointer; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .color-picker-wrap { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; border: 2px solid var(--border-color); cursor: pointer; }
+        input[type="color"] { width: 200%; height: 200%; margin: -50%; border: none; cursor: pointer; }
+        .actions-p { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-family: inherit; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-primary { background: var(--success); color: white; }
+        .btn-secondary { background: var(--primary); color: white; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header"><img src="logo.jpg" class="logo-img"></div>
+        <div class="section-p">
+            <h3 class="section-title" id="ui-s1-title">أنشئ بطاقة التهنئة الخاصة بك</h3>
+            <div style="margin-bottom: 15px;">
+                <label class="label-sm" id="ui-lang-lbl">١. اللغة</label>
+                <div class="segmented-control" id="lang-group">
+                    <button class="seg-btn active" onclick="setOption('lang', 'ar', this)" id="ui-l-ar">العربية</button>
+                    <button class="seg-btn" onclick="setOption('lang', 'en', this)" id="ui-l-en">English</button>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label class="label-sm" id="ui-design-lbl">٢. التصميم</label>
+                    <div class="segmented-control" id="design-group">
+                        <button class="seg-btn active" onclick="setOption('design', '1', this)">١</button>
+                        <button class="seg-btn" onclick="setOption('design', '2', this)">٢</button>
+                        <button class="seg-btn" onclick="setOption('design', '3', this)">٣</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="label-sm" id="ui-format-lbl">٣. المقاس</label>
+                    <div class="segmented-control" id="format-group">
+                        <button class="seg-btn active" onclick="setOption('format', 'v', this)" id="ui-f-v">طولي</button>
+                        <button class="seg-btn" onclick="setOption('format', 'h', this)" id="ui-f-h">عرضي</button>
+                        <button class="seg-btn" onclick="setOption('format', 's', this)" id="ui-f-s">مربع</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="preview-container"><div class="preview-box"><canvas id="mainCanvas"></canvas></div></div>
+        <div class="section-p">
+            <h3 class="section-title" id="ui-s2-title">تخصيص النص</h3>
+            <input type="text" class="input-field" id="nameInp" placeholder="ادخل الاسم هنا..." oninput="draw()">
+            <input type="text" class="input-field" id="jobInp" style="font-size: 14px;" placeholder="المسمى الوظيفي (اختياري)..." oninput="draw()">
+            <div class="style-grid">
+                <div class="control-row"><label class="label-sm" id="ui-size-lbl">حجم الخط</label><input type="range" id="fontSz" min="30" max="150" value="75" oninput="draw()"></div>
+                <div class="control-row"><label class="label-sm" id="ui-x-lbl">المكان عرضياً</label><input type="range" id="posX" min="0" max="100" value="50" oninput="draw()"></div>
+                <div class="control-row"><label class="label-sm" id="ui-y-lbl">المكان طولياً</label><input type="range" id="posY" min="10" max="98" value="82" oninput="draw()"></div>
+                <div class="control-row"><label class="label-sm" id="ui-color-lbl">اللون</label><div class="color-picker-wrap"><input type="color" id="textClr" value="#ffffff" oninput="draw()"></div></div>
+            </div>
+        </div>
+        <div class="actions-p"><button class="btn btn-primary" id="ui-save-btn" onclick="download()">تحميل البطاقة</button><button class="btn btn-secondary" id="ui-share-btn" onclick="share()">مشاركة سريعة</button></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const bg = new Image();
+        let state = { lang: 'ar', design: '1', format: 'v' };
+
+        // --- ⚙️ لوحة التحكم في الأوزان الافتراضية ---
+        const configDefaults = {
+            '1': {
+                'v': { y: 82, size: 75, x: 50 }, 
+                'h': { y: 78, size: 55, x: 30 }, // تم التصغير والتحريك لليسار لتطابق الصورة
+                's': { y: 85, size: 60, x: 50 }
+            },
+            '2': {
+                'v': { y: 70, size: 75, x: 50 }, 
+                'h': { y: 78, size: 75, x: 50 }, 
+                's': { y: 75, size: 60, x: 50 }  
+            },
+            '3': { 
+                'v': { y: 80, size: 60, x: 50 }, 
+                'h': { y: 80, size: 55, x: 35 }, // تم التحريك لليسار والتصغير لتطابق الصورة
+                's': { y: 80, size: 60, x: 50 }  
+            }
+        };
+
+        const ui = {
+            ar: { s1:"أنشئ بطاقة التهنئة الخاصة بك", s2:"تخصيص النص", lang:"١. اللغة", design:"٢. التصميم", format:"٣. المقاس", f_v:"طولي", f_h:"عرضي", f_s:"مربع", l_ar:"العربية", l_en:"English", size:"حجم الخط", x_pos:"المكان عرضياً", y_pos:"المكان طولياً", color:"اللون", name:"ادخل الاسم هنا...", job:"المسمى الوظيفي (اختياري)...", save:"تحميل البطاقة", share:"مشاركة سريعة", dir:"rtl" },
+            en: { s1:"Create Your Greeting Card", s2:"Text Customization", lang:"1. Language", design:"2. Design", format:"3. Format", f_v:"Portrait", f_h:"Landscape", f_s:"Square", l_ar:"AR", l_en:"English", size:"Font Size", x_pos:"Horizontal Pos", y_pos:"Vertical Pos", color:"Color", name:"Enter Name...", job:"Job Title (Optional)...", save:"Download Card", share:"Quick Share", dir:"ltr" }
+        };
+
+        function applyDefaults() {
+            const defaults = configDefaults[state.design][state.format];
+            document.getElementById('posY').value = defaults.y;
+            document.getElementById('fontSz').value = defaults.size;
+            document.getElementById('posX').value = defaults.x !== undefined ? defaults.x : 50;
+        }
+
+        function setOption(type, value, btnElement) {
+            state[type] = value;
+            const group = document.getElementById(`${type}-group`);
+            group.querySelectorAll('.seg-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            if (type === 'design') {
+                document.getElementById('textClr').value = (value === '1' || value === '3') ? '#ffffff' : '#333740';
+            }
+            
+            applyDefaults();
+
+            if (type === 'lang') updateUILabels();
+            refresh();
+        }
+
+        function updateUILabels() {
+            const d = ui[state.lang];
+            document.getElementById('mainHtml').dir = d.dir;
+            document.getElementById('ui-s1-title').innerText = d.s1; document.getElementById('ui-s2-title').innerText = d.s2;
+            document.getElementById('ui-lang-lbl').innerText = d.lang; document.getElementById('ui-design-lbl').innerText = d.design;
+            document.getElementById('ui-format-lbl').innerText = d.format; document.getElementById('ui-f-v').innerText = d.f_v;
+            document.getElementById('ui-f-h').innerText = d.f_h; document.getElementById('ui-f-s').innerText = d.f_s;
+            document.getElementById('ui-size-lbl').innerText = d.size; document.getElementById('ui-x-lbl').innerText = d.x_pos;
+            document.getElementById('ui-y-lbl').innerText = d.y_pos; document.getElementById('ui-color-lbl').innerText = d.color;
+            document.getElementById('nameInp').placeholder = d.name; document.getElementById('jobInp').placeholder = d.job;
+            document.getElementById('ui-save-btn').innerText = d.save; document.getElementById('ui-share-btn').innerText = d.share;
+        }
+
+        function refresh() {
+            bg.src = `${state.design}_${state.lang}_${state.format}.jpg`;
+            bg.onload = () => draw();
+        }
+
+        async function draw() {
+            if(!bg.complete) return;
+            canvas.width = bg.width; canvas.height = bg.height;
+            ctx.drawImage(bg, 0, 0);
+            const name = document.getElementById('nameInp').value;
+            const job = document.getElementById('jobInp').value;
+            const sz = parseInt(document.getElementById('fontSz').value);
+            const clr = document.getElementById('textClr').value;
+            const x = canvas.width * (document.getElementById('posX').value / 100);
+            const y = canvas.height * (document.getElementById('posY').value / 100);
+
+            if(name || job) {
+                await document.fonts.load(`bold ${sz}px MyCustomFont`);
+                ctx.textAlign = "center"; ctx.fillStyle = clr;
+                ctx.font = `bold ${sz}px 'MyCustomFont'`; ctx.fillText(name, x, y);
+                if(job) { ctx.font = `${sz * 0.6}px 'MyCustomFont'`; ctx.fillText(job, x, y + (sz * 0.85)); }
+            }
+        }
+
+        function download() { const a = document.createElement('a'); a.download = 'card.png'; a.href = canvas.toDataURL('image/png'); a.click(); }
+        async function share() { canvas.toBlob(async b => { const f = new File([b], 'card.png', {type:'image/png'}); if(navigator.share) await navigator.share({files:[f]}); else alert("المشاركة غير مدعومة"); }); }
+
+        applyDefaults();
+        updateUILabels();
+        refresh();
+    </script>
+</body>
+</html>
